@@ -10,6 +10,7 @@ public class CountDown : MonoBehaviour
     public UnityEvent OnCountFinished = new UnityEvent();
     public UnityEvent<int> OnCount = new UnityEvent<int>();
     bool isCounting;
+    Sequence seq;
 
     public void StartCount()
     {
@@ -18,18 +19,25 @@ public class CountDown : MonoBehaviour
         else
             isCounting = true;
 
-        var seq = DOTween.Sequence();
+        seq = DOTween.Sequence();
 
         OnCount.Invoke(duration);
 
         for (int i = duration - 1; i >= 0; i--)
         {
+            var count = i;
             seq.Append(transform
                 .DOMove(this.transform.position, 1)
-                .OnComplete(() => OnCount.Invoke(i)));
+                .SetUpdate(true)
+                .OnComplete(() => OnCount.Invoke(count)));
         }
         seq.Append(transform
-        .DOMove(this.transform.position, 1));
-        OnCountFinished.Invoke();
+            .DOMove(this.transform.position, 1))
+            .SetUpdate(true)
+            .OnComplete(() => {
+                isCounting = false;
+                OnCountFinished.Invoke();
+                }
+            );
     }
 }
